@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Base</title>
+    <link rel="stylesheet" href="./assets/style/style.css">
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container container--header">
+            <div class="header__logo">GEAR<span>SHOP</span></div>
+            <button class="header__cart-button">
+                <ion-icon name="bag-outline"></ion-icon>
+            </button>
+        </div>
+    </header>
+    <main>
+        <section class="home">
+            <div class="container container--home">
+                <div class="home__textbox">
+                    <small class="home__small">Seja bem-vindo a</small>
+                    <h1 class="home__title">GEAR<span>SHOP</span></h1>
+                    <p class="home__desc">O melhor lugar para melhorar o seu setup</p>
+                    <p class="home__quant">Mais de <span data-js="home-quant">500</span> produtos vendidos hoje</p>
+                    <button class="home__button">Ver Produtos</button>
+                </div>
+                <div class="home__slider">
+                    <div class="swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <img src="https://adrenaline.com.br/uploads/chamadas/HyperX_lan%C3%A7a_quatro_produtos_no_mercado_brasileiro_no_segundo_semestre_de_2022.jpg">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://pbs.twimg.com/media/EhKcgO2XsAAu_4Y.jpg:large">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://m.media-amazon.com/images/S/abs-image-upload-na/e/AmazonStores/A1F83G8C2ARO7P/9048123379002828e52e0af1ad2010a0.w1500.h320.jpg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="products">
+            <div class="container container--products">
+                <div class="products__filter">
+                    <h2 class="section__subtitle">Nossos produtos</h2>
+                    <div class="search__menu" data-js="filter-area">
+                        <button class="filter__button" data-js="filter-button">Mais relevantes</button>
+                        <ul class="filter__list" data-js="filter-list">
+                            <li class="filter__item" data-js="relevant">Mais Relevantes</li>
+                            <li class="filter__item" data-js="lowToHigh">Menor Preco</li>
+                            <li class="filter__item" data-js="highToLow">Maior Preco</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="products__area" data-js="products-area"></div>
+            </div>
+        </section>
+    </main>
+    <script src="./assets/js/main.js"></script>
+</body>
+
+</html>
