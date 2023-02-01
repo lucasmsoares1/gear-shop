@@ -27,11 +27,22 @@
     <main>
         <aside class="cart" data-js="cart">
             <div class="cart__header">
-                <button class="cart__close" data-js="toggle-cart">x</button>
+                <button class="cart__close" data-js="toggle-cart">
+                    <ion-icon name="close"></ion-icon>
+                </button>
                 <div class="cart__title">Seu carrinho</div>
-                <div></div>
+                <div class="placeholder"></div>
             </div>
             <ul class="cart__list" data-js="cart-list"></ul>
+            <div class="cart__bottom">
+                <div class="cart__total">
+                    Total:
+                    <span data-js="total-price">R$ 0,00</span>
+                </div>
+                <button class="cart__finish">
+                    Finalizar a Compra
+                </button>
+            </div>
         </aside>
 
         <section class="home">

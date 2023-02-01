@@ -6,6 +6,7 @@ const soldQuant = document.querySelector('[data-js="home-quant"]')
 const cartButton = document.querySelectorAll('[data-js="toggle-cart"]')
 const cartArea = document.querySelector('[data-js="cart"]')
 const cartAmount = document.querySelector('[data-js="cart-amount"]')
+const totalPrice = document.querySelector('[data-js="total-price"]')
 
 /********** products data **********/
 let products = [
@@ -26,7 +27,7 @@ let products = [
     ,
     {
         id: 2,
-        name: "Redragon Dark Avanger V.3",
+        name: "Redragon Dark Avanger",
         price: 300,
         type: "keyboard",
         srcImg: "https://static.wixstatic.com/media/71a6c2_a37b6de75daa476cb23565aad17af2ac~mv2.png/v1/fill/w_293,h_352,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Mouse.png",
@@ -98,6 +99,10 @@ let products = [
 let cart = []
 
 
+/********** convert prices to brl ( R$ included ) **********/
+const convertToBRL = (price) => price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+
+
 
 /*********** home counter **********/
 const activeCounter = () => {
@@ -141,7 +146,7 @@ const renderProducts = (array) => {
                     <img src=${srcImg} />
                 </div>
                 <span class="product__name">${name}</span>
-                <span class="product__price">${price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
+                <span class="product__price">${convertToBRL(price)}</span>
                 <div class="card__bottom">
                     <ion-icon name="add-circle-outline" class="card__icon"></ion-icon>
                     Adicionar ao carrinho
@@ -209,20 +214,31 @@ const renderCartProducts = () => {
                 <img src=${srcImg}>
             </div>
             <div class="cart-product__name">${name}</div>
-            <div class="cart-product__amount">${quant}</div>
-            <div class="cart-product__price">${price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</div>
+            <div class="cart-product__amount">
+                <button class="cart-product__controller" data-js="increase-amount" onclick="decreaseProductAmount(${id})">-</button>
+                ${quant}
+                <button class="cart-product__controller" data-js="decrease-amount" onclick="increaseProductAmount(${id})">+</button>
+            </div>
+            <div class="cart-product__price">${convertToBRL(price)}</div>
         </li>
         `
     }).join(' ')
 }
 
-const toggleCart = () => cartArea.classList.toggle('cart--show')
+const toggleCart = () => {
+    cartArea.classList.toggle('cart--show')
+    document.body.classList.toggle('disable-overflow')
+}
 
-const updateCartAmountIndicator = () => cartAmount.textContent = cart.length
+// update total price and amount of items in the header
+const updateCartAmounts = () => {
+    cartAmount.textContent = cart.reduce((acc, curItem) => acc += curItem.quant, 0)
+    totalPrice
+        .textContent = convertToBRL(cart
+        .reduce((acc, curItem) => acc += curItem.price * curItem.quant, 0))
+}
 
-cartButton.forEach(button => {
-    button.addEventListener('click', toggleCart)
-})
+cartButton.forEach(button => button.addEventListener('click', toggleCart))
 
 const addProductIntoCart = (productId) => {
     let selectedProduct = products.find(product => product.id === productId)
@@ -233,7 +249,7 @@ const addProductIntoCart = (productId) => {
             ...selectedProduct,
             quant: 1
         })
-    
+
     } else {
         cart = cart.map(cartProduct => {
             if (cartProduct.id === selectedProduct.id) {
@@ -245,13 +261,39 @@ const addProductIntoCart = (productId) => {
     }
 
 
+    updateCartAmounts()
     renderCartProducts()
-    updateCartAmountIndicator()
 }
 
 const removeFromCart = (productId) => {
     cart = cart.filter(product => product.id !== productId)
-    updateCartAmountIndicator()
+    updateCartAmounts()
+    renderCartProducts()
+}
+
+const increaseProductAmount = (productId) => {
+    cart = cart.map(cartProduct => {
+        if (cartProduct.id === productId) {
+            return { ...cartProduct, quant: cartProduct.quant += 1 }
+        }
+
+        return cartProduct
+    })
+    updateCartAmounts()
+    renderCartProducts()
+}
+
+const decreaseProductAmount = (productId) => {
+    cart = cart.map(cartProduct => {
+        if (cartProduct.id === productId) {
+            if(cartProduct.quant > 1) {
+                return { ...cartProduct, quant: cartProduct.quant -= 1 }
+            }
+        }
+
+        return cartProduct
+    })
+    updateCartAmounts()
     renderCartProducts()
 }
 
