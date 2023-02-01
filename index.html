@@ -17,12 +17,23 @@
     <header class="header">
         <div class="container container--header">
             <div class="header__logo">GEAR<span>SHOP</span></div>
-            <button class="header__cart-button">
+            <button class="header__cart-button" data-js="toggle-cart">
                 <ion-icon name="bag-outline"></ion-icon>
+                <div class="header__cart-amount" data-js="cart-amount">0</div>
             </button>
         </div>
     </header>
+    
     <main>
+        <aside class="cart" data-js="cart">
+            <div class="cart__header">
+                <button class="cart__close" data-js="toggle-cart">x</button>
+                <div class="cart__title">Seu carrinho</div>
+                <div></div>
+            </div>
+            <ul class="cart__list" data-js="cart-list"></ul>
+        </aside>
+
         <section class="home">
             <div class="container container--home">
                 <div class="home__textbox">
@@ -49,6 +60,7 @@
                 </div>
             </div>
         </section>
+
         <section class="products">
             <div class="container container--products">
                 <div class="products__filter">

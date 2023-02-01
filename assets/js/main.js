@@ -3,8 +3,11 @@ const filterButton = document.querySelector('[data-js="filter-button"]')
 const filterArea = document.querySelector('[data-js="filter-area"]')
 const filterList = document.querySelector('[data-js="filter-list"]')
 const soldQuant = document.querySelector('[data-js="home-quant"]')
+const cartButton = document.querySelectorAll('[data-js="toggle-cart"]')
+const cartArea = document.querySelector('[data-js="cart"]')
+const cartAmount = document.querySelector('[data-js="cart-amount"]')
 
-// products data
+/********** products data **********/
 let products = [
     {
         id: 0,
@@ -92,7 +95,11 @@ let products = [
     }
 ];
 
-// home sold counter
+let cart = []
+
+
+
+/*********** home counter **********/
 const activeCounter = () => {
     let accumulator = 0
     let endValue = 500
@@ -107,10 +114,11 @@ const activeCounter = () => {
         }
     }, duration)
 }
-
 activeCounter()
 
-// slider (swiper.js)
+
+
+/********** home slider **********/
 const swiper = new Swiper('.swiper', {
     direction: 'horizontal',
     loop: true,
@@ -122,11 +130,13 @@ const swiper = new Swiper('.swiper', {
     }
 });
 
-// render products into DOM
-const addProductsIntoDOM = (array) => {
+
+
+/********** render products **********/
+const renderProducts = (array) => {
     productsArea.innerHTML = array.map(({ id, name, price, srcImg }) => {
         return `
-            <div class="product__card">
+            <div class="product__card" onclick="addProductIntoCart(${id})">
                 <div class="product__image">
                     <img src=${srcImg} />
                 </div>
@@ -140,20 +150,21 @@ const addProductsIntoDOM = (array) => {
         `
     }).join(' ')
 }
+renderProducts(products)
 
-// toggle filter menu
+
+
+/********** filters **********/
 const toggleMenu = () => {
     filterList.classList.toggle('filter__list--show')
 }
 
-// close menu and change the text inside button
 const changeFilter = (selecterSearchTerm) => {
     toggleMenu()
     filterButton.textContent = selecterSearchTerm
-    addProductsIntoDOM(products)
+    renderProducts(products)
 }
 
-// order filter
 filterArea.addEventListener('click', (e) => {
     const clickedElement = e.target.dataset.js
 
@@ -182,5 +193,66 @@ filterArea.addEventListener('click', (e) => {
     }
 })
 
-// render products
-addProductsIntoDOM(products)
+
+
+/********** cart **********/
+const renderCartProducts = () => {
+    const cartList = cartArea.querySelector('[data-js="cart-list"]')
+
+    cartList.innerHTML = cart.map(({ id, name, price, srcImg, quant }) => {
+        return `
+        <li class="cart-product">
+            <button class="cart-product__remove" onclick="removeFromCart(${id})">
+                <ion-icon name="close"></ion-icon>
+            </button>
+            <div class="cart-product__image">
+                <img src=${srcImg}>
+            </div>
+            <div class="cart-product__name">${name}</div>
+            <div class="cart-product__amount">${quant}</div>
+            <div class="cart-product__price">${price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</div>
+        </li>
+        `
+    }).join(' ')
+}
+
+const toggleCart = () => cartArea.classList.toggle('cart--show')
+
+const updateCartAmountIndicator = () => cartAmount.textContent = cart.length
+
+cartButton.forEach(button => {
+    button.addEventListener('click', toggleCart)
+})
+
+const addProductIntoCart = (productId) => {
+    let selectedProduct = products.find(product => product.id === productId)
+    const isProductAlreadyInCart = cart.find(cartProduct => cartProduct.id === selectedProduct.id)
+
+    if (!isProductAlreadyInCart) {
+        cart.push({
+            ...selectedProduct,
+            quant: 1
+        })
+    
+    } else {
+        cart = cart.map(cartProduct => {
+            if (cartProduct.id === selectedProduct.id) {
+                return { ...cartProduct, quant: cartProduct.quant += 1 }
+            }
+
+            return cartProduct
+        })
+    }
+
+
+    renderCartProducts()
+    updateCartAmountIndicator()
+}
+
+const removeFromCart = (productId) => {
+    cart = cart.filter(product => product.id !== productId)
+    updateCartAmountIndicator()
+    renderCartProducts()
+}
+
+
