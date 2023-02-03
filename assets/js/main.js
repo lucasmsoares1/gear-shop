@@ -3,7 +3,6 @@ const filterButton = document.querySelector('[data-js="filter-button"]')
 const filterArea = document.querySelector('[data-js="filter-area"]')
 const filterList = document.querySelector('[data-js="filter-list"]')
 const soldQuant = document.querySelector('[data-js="home-quant"]')
-const cartButton = document.querySelectorAll('[data-js="toggle-cart"]')
 const cartArea = document.querySelector('[data-js="cart"]')
 const cartAmount = document.querySelector('[data-js="cart-amount"]')
 const totalPrice = document.querySelector('[data-js="total-price"]')
@@ -96,7 +95,11 @@ let products = [
     }
 ];
 
+
+
+/********** cart **********/
 let cart = []
+
 
 
 /********** convert prices to brl ( R$ included ) **********/
@@ -138,6 +141,7 @@ const swiper = new Swiper('.swiper', {
 
 
 /********** render products **********/
+// add products into DOM
 const renderProducts = (array) => {
     productsArea.innerHTML = array.map(({ id, name, price, srcImg }) => {
         return `
@@ -160,50 +164,59 @@ renderProducts(products)
 
 
 /********** filters **********/
-const toggleMenu = () => {
-    filterList.classList.toggle('filter__list--show')
-}
+// open and close filter menu
+const toggleMenu = () => filterList.classList.toggle('filter__list--show')
 
+// change filter
 const changeFilter = (selecterSearchTerm) => {
     toggleMenu()
     filterButton.textContent = selecterSearchTerm
     renderProducts(products)
 }
 
+// select filter ( event delegation )
 filterArea.addEventListener('click', (e) => {
     const clickedElement = e.target.dataset.js
 
-    switch (clickedElement) {
-        case 'filter-button':
-            toggleMenu()
-            break;
+    if (clickedElement === 'filter-button') {
+        toggleMenu()
+        return
+    }
 
+    let sortFunction;
+    let filterText;
+
+    switch (clickedElement) {
         case 'lowToHigh':
-            products = products.sort((a, b) => a.price < b.price ? -1 : true)
-            changeFilter('Menor preco')
+            sortFunction = (a, b) => a.price < b.price ? -1 : true;
+            filterText = 'Menor preco';
             break;
 
         case 'highToLow':
-            products = products.sort((a, b) => a.price > b.price ? -1 : true)
-            changeFilter('Maior preco')
+            sortFunction = (a, b) => a.price > b.price ? -1 : true;
+            filterText = 'Maior preco';
             break;
 
         case 'relevant':
-            products = products.sort((a, b) => a.id < b.id ? -1 : true)
-            changeFilter('Mais relevantes')
+            sortFunction = (a, b) => a.id < b.id ? -1 : true;
+            filterText = 'Mais relevantes';
             break;
 
         default:
-            break;
+            return;
     }
+
+    products = products.sort(sortFunction);
+    changeFilter(filterText);
 })
 
 
 
 /********** cart **********/
+// render products into DOM
 const renderCartProducts = () => {
     const cartList = cartArea.querySelector('[data-js="cart-list"]')
-
+    cartList.innerHTML = ''
     cartList.innerHTML = cart.map(({ id, name, price, srcImg, quant }) => {
         return `
         <li class="cart-product">
@@ -215,9 +228,9 @@ const renderCartProducts = () => {
             </div>
             <div class="cart-product__name">${name}</div>
             <div class="cart-product__amount">
-                <button class="cart-product__controller" data-js="increase-amount" onclick="decreaseProductAmount(${id})">-</button>
+                <button class="cart-product__controller" onclick="changeProductAmount('decrease', ${id})">-</button>
                 ${quant}
-                <button class="cart-product__controller" data-js="decrease-amount" onclick="increaseProductAmount(${id})">+</button>
+                <button class="cart-product__controller" onclick="changeProductAmount('increase', ${id})">+</button>
             </div>
             <div class="cart-product__price">${convertToBRL(price)}</div>
         </li>
@@ -225,21 +238,49 @@ const renderCartProducts = () => {
     }).join(' ')
 }
 
+// open and close cart
 const toggleCart = () => {
     cartArea.classList.toggle('cart--show')
     document.body.classList.toggle('disable-overflow')
 }
 
-// update total price and amount of items in the header
+// update total and cart items amount
 const updateCartAmounts = () => {
     cartAmount.textContent = cart.reduce((acc, curItem) => acc += curItem.quant, 0)
     totalPrice
         .textContent = convertToBRL(cart
-        .reduce((acc, curItem) => acc += curItem.price * curItem.quant, 0))
+            .reduce((acc, curItem) => acc += curItem.price * curItem.quant, 0))
 }
 
-cartButton.forEach(button => button.addEventListener('click', toggleCart))
+// reusable map to change the products amount
+const mapCartItems = (operationType, productId) => {
+    cart = cart.map(cartProduct => {
+        const isIncrease = operationType === 'increase';
+        const isDecrease = operationType === 'decrease' && cartProduct.quant > 1;
 
+        if (cartProduct.id !== productId) {
+            return cartProduct;
+        }
+
+        return isIncrease
+            ? { ...cartProduct, quant: cartProduct.quant + 1 }
+            : (isDecrease
+                ? { ...cartProduct, quant: cartProduct.quant - 1 }
+                : cartProduct);
+    })
+}
+
+// increase and decreasing the amount of items in the cart
+const changeProductAmount = (changeType, productId) => {
+    changeType === 'increase'
+        ? mapCartItems(changeType, productId)
+        : mapCartItems(changeType, productId)
+
+    updateCartAmounts()
+    renderCartProducts()
+}
+
+// add prodcts into cart
 const addProductIntoCart = (productId) => {
     let selectedProduct = products.find(product => product.id === productId)
     const isProductAlreadyInCart = cart.find(cartProduct => cartProduct.id === selectedProduct.id)
@@ -251,50 +292,22 @@ const addProductIntoCart = (productId) => {
         })
 
     } else {
-        cart = cart.map(cartProduct => {
-            if (cartProduct.id === selectedProduct.id) {
-                return { ...cartProduct, quant: cartProduct.quant += 1 }
-            }
-
-            return cartProduct
-        })
+        changeProductAmount('increase', selectedProduct.id)
     }
-
 
     updateCartAmounts()
     renderCartProducts()
 }
 
+// remove items from cart
 const removeFromCart = (productId) => {
     cart = cart.filter(product => product.id !== productId)
     updateCartAmounts()
     renderCartProducts()
 }
 
-const increaseProductAmount = (productId) => {
-    cart = cart.map(cartProduct => {
-        if (cartProduct.id === productId) {
-            return { ...cartProduct, quant: cartProduct.quant += 1 }
-        }
 
-        return cartProduct
-    })
-    updateCartAmounts()
-    renderCartProducts()
-}
 
-const decreaseProductAmount = (productId) => {
-    cart = cart.map(cartProduct => {
-        if (cartProduct.id === productId) {
-            if(cartProduct.quant > 1) {
-                return { ...cartProduct, quant: cartProduct.quant -= 1 }
-            }
-        }
 
-        return cartProduct
-    })
-    updateCartAmounts()
-    renderCartProducts()
-}
 
 
